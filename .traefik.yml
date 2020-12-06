@@ -1,0 +1,9 @@
+displayName: Duplicate Header
+type: middleware
+summary: This plugin can duplicate a header to one or more headers.
+import: github.com/containeroo/duplicateheader
+testData:
+  source: "Cf-Connecting-Ip"
+  destination:
+    - "X-Real-Ip"
+    - "X-Forwarded-For"
