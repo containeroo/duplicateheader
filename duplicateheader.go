@@ -27,10 +27,11 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	}
 
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		source := req.Header.Get(config.Source)
-		if source != "" {
-			for _, dest := range config.Destination {
-				req.Header.Set(dest, source)
+		if source, ok := req.Header[config.Source]; ok {
+			if source[0] != "" {
+				for _, dest := range config.Destination {
+					req.Header.Set(dest, source[0])
+				}
 			}
 		}
 		next.ServeHTTP(rw, req)
