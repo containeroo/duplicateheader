@@ -30,7 +30,8 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		if source, ok := req.Header[config.Source]; ok {
 			if source[0] != "" {
 				for _, dest := range config.Destination {
-					req.Header.Set(dest, source[0])
+					req.Header.Del(dest)
+					req.Header.Add(dest, source[0])
 				}
 			}
 		}
