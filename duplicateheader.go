@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"runtime/debug"
 )
 
 // Config the plugin configuration.
@@ -27,6 +28,11 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	}
 
 	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Println("stacktrace from panic: \n" + string(debug.Stack()))
+			}
+		}()
 		if source, ok := req.Header[config.Source]; ok {
 			if source[0] != "" {
 				for _, dest := range config.Destination {
