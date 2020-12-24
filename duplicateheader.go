@@ -12,6 +12,13 @@ type Config struct {
 	Destination []string `json:"destination,omitempty"`
 }
 
+// DuplicateHeader holds the necessary components of a Traefik plugin
+type DuplicateHeader struct {
+	next        http.Handler
+	Source      string
+	Destination []string
+}
+
 // CreateConfig creates and initializes the plugin configuration.
 func CreateConfig() *Config {
 	return &Config{}
@@ -26,15 +33,19 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		return nil, fmt.Errorf("destination can't be empty")
 	}
 
-	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		if source, ok := req.Header[config.Source]; ok {
-			if source[0] != "" {
-				for _, dest := range config.Destination {
-					req.Header.Del(dest)
-					req.Header.Add(dest, source[0])
-				}
-			}
+	return &DuplicateHeader{
+		next:        next,
+		Source:      config.Source,
+		Destination: config.Destination,
+	}, nil
+}
+
+func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	source := req.Header.Get(d.Source)
+	if source != "" {
+		for _, dest := range d.Destination {
+			req.Header.Set(dest, source)
 		}
-		next.ServeHTTP(rw, req)
-	}), nil
+	}
+	d.next.ServeHTTP(rw, req)
 }
