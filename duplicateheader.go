@@ -43,7 +43,10 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if source, ok := req.Header[d.Source]; ok {
 		if len(source) != 0 {
+			fmt.Println("source to set:")
+			fmt.Println(source[0])
 			for _, dest := range d.Destination {
+				fmt.Printf("destination: %s", dest)
 				req.Header.Set(dest, source[0])
 			}
 		}
