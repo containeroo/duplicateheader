@@ -3,6 +3,7 @@ package duplicateheader
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 )
 
@@ -15,6 +16,7 @@ type Config struct {
 // DuplicateHeader holds the necessary components of a Traefik plugin
 type DuplicateHeader struct {
 	next        http.Handler
+	name        string
 	Source      string
 	Destination []string
 }
@@ -33,20 +35,23 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		return nil, fmt.Errorf("destination can't be empty")
 	}
 
+	var DestCanonicalHeaderKey []string
+	for _, dest := range config.Destination {
+		DestCanonicalHeaderKey = append(DestCanonicalHeaderKey, http.CanonicalHeaderKey(dest))
+	}
+
 	return &DuplicateHeader{
 		next:        next,
-		Source:      config.Source,
-		Destination: config.Destination,
+		name:        name,
+		Source:      http.CanonicalHeaderKey(config.Source),
+		Destination: DestCanonicalHeaderKey,
 	}, nil
 }
 
 func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if source, ok := req.Header[d.Source]; ok {
-		if len(source) != 0 {
-			fmt.Println("source to set:")
-			fmt.Println(source[0])
+		if len(source) != 0 && net.ParseIP(source[0]) != nil {
 			for _, dest := range d.Destination {
-				fmt.Printf("destination: %s\n", dest)
 				req.Header.Set(dest, source[0])
 			}
 		}
