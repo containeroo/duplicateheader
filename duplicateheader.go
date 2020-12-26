@@ -8,8 +8,8 @@ import (
 
 // Config the plugin configuration.
 type Config struct {
-	Source      string   `json:"source,omitempty"`
-	Destination []string `json:"destination,omitempty"`
+	Source      string   `yaml:"source"`
+	Destination []string `yaml:"destination"`
 }
 
 // DuplicateHeader holds the necessary components of a Traefik plugin
@@ -46,7 +46,7 @@ func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			fmt.Println("source to set:")
 			fmt.Println(source[0])
 			for _, dest := range d.Destination {
-				fmt.Printf("destination: %s", dest)
+				fmt.Printf("destination: %s\n", dest)
 				req.Header.Set(dest, source[0])
 			}
 		}
