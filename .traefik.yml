@@ -5,5 +5,5 @@ import: github.com/containeroo/duplicateheader
 testData:
   source: "Cf-Connecting-Ip"
   destination:
-    - "X-Real-Ip"
+    - "X-Real-IP"
     - "X-Forwarded-For"
