@@ -52,6 +52,7 @@ func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if source, ok := req.Header[d.Source]; ok {
 		if len(source) != 0 && net.ParseIP(source[0]) != nil {
 			for _, dest := range d.Destination {
+				fmt.Printf("set %s as %s\n", source[0], dest)
 				req.Header.Set(dest, source[0])
 			}
 		}
