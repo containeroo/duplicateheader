@@ -3,7 +3,6 @@ package duplicateheader
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/http"
 )
 
@@ -50,10 +49,10 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 
 func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if source, ok := req.Header[d.Source]; ok {
-		if len(source) != 0 && net.ParseIP(source[0]) != nil {
+		if len(source) != 0 {
 			for _, dest := range d.Destination {
-				fmt.Printf("set %s as %s\n", source[0], dest)
-				req.Header.Set(dest, source[0])
+				fmt.Printf("set %s as %s\n", source, dest)
+				req.Header[dest] = source
 			}
 		}
 	}
