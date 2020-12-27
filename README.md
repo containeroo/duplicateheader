@@ -19,7 +19,7 @@ experimental:
   plugins:
     duplicateheader:
       moduleName: "github.com/containeroo/duplicateheader"
-      version: "v1.0.13"
+      version: "v1.0.14"
 ```
 
 ```yaml

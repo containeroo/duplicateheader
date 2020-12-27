@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 // Config the plugin configuration.
@@ -52,12 +51,12 @@ func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if source, ok := req.Header[d.Source]; ok {
 		if len(source) != 0 {
 			for _, dest := range d.Destination {
-				sources := strings.Join(source, ",")
-				fmt.Printf("set %s as %s\n", sources, dest)
+				if dest == "" {
+					continue
+				}
 				req.Header[dest] = source
 			}
 		}
 	}
-
 	d.next.ServeHTTP(rw, req)
 }
