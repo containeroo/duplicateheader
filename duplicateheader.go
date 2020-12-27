@@ -51,9 +51,6 @@ func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if source, ok := req.Header[d.Source]; ok {
 		if len(source) != 0 {
 			for _, dest := range d.Destination {
-				if dest == "" {
-					continue
-				}
 				req.Header[dest] = source
 			}
 		}
