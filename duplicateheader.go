@@ -3,8 +3,8 @@ package duplicateheader
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/http"
+	"strings"
 )
 
 // Config the plugin configuration.
@@ -51,20 +51,13 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if source, ok := req.Header[d.Source]; ok {
 		if len(source) != 0 {
-			addr := net.ParseIP(source[0])
-			if addr != nil {
-				d.next.ServeHTTP(rw, req)
-				return
-			}
-			if addr.To4() != nil {
-				d.next.ServeHTTP(rw, req)
-				return
-			}
 			for _, dest := range d.Destination {
-				fmt.Printf("set %s as %s\n", addr.String(), dest)
-				req.Header.Set(dest, addr.String())
+				sources := strings.Join(source, ",")
+				fmt.Printf("set %s as %s\n", sources, dest)
+				req.Header[dest] = source
 			}
 		}
 	}
+
 	d.next.ServeHTTP(rw, req)
 }
