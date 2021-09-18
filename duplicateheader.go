@@ -34,25 +34,19 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		return nil, fmt.Errorf("destination can't be empty")
 	}
 
-	var DestCanonicalHeaderKey []string
-	for _, dest := range config.Destination {
-		DestCanonicalHeaderKey = append(DestCanonicalHeaderKey, http.CanonicalHeaderKey(dest))
-	}
-
 	return &DuplicateHeader{
 		next:        next,
 		name:        name,
-		Source:      http.CanonicalHeaderKey(config.Source),
-		Destination: DestCanonicalHeaderKey,
+		Source:      config.Source,
+		Destination: config.Destination,
 	}, nil
 }
 
 func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	if source, ok := req.Header[d.Source]; ok {
-		if len(source) != 0 {
-			for _, dest := range d.Destination {
-				req.Header[dest] = source
-			}
+	source := req.Header.Get(d.Source)
+	if len(source) != 0 {
+		for _, dest := range d.Destination {
+			req.Header.Set(dest, source)
 		}
 	}
 	d.next.ServeHTTP(rw, req)
