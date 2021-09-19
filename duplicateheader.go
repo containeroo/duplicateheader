@@ -57,7 +57,7 @@ func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		if source := req.Header.Get(d.Source); source != "" {
 			for _, dest := range d.Destination {
 				Logger.Printf("Set Header: %v: %v", dest, source)
-				req.Header.Set(dest, source)
+				rw.Header().Set(dest, source)
 			}
 		}
 	}
