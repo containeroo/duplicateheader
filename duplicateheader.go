@@ -56,11 +56,10 @@ func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	Logger.Printf("New request: %v", req)
 	Logger.Printf("Source Header: %v", d.Source)
 
-	source := rw.Header().Get(d.Source)
-	if len(source) != 0 {
+	if source := req.Header.Get(d.Source); source != "" {
 		for _, dest := range d.Destination {
 			Logger.Printf("Set Header: %v: %v", dest, source)
-			rw.Header().Set(dest, source)
+			req.Header.Set(dest, source)
 		}
 	}
 	d.next.ServeHTTP(rw, req)
