@@ -59,11 +59,7 @@ func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 				Logger.Printf("Set Header: %v: %v", dest, source)
 				req.Header.Set(dest, source)
 			}
-		} else {
-			Logger.Println("Source header not found")
 		}
-	} else {
-		Logger.Println("Header is empty")
 	}
 	d.next.ServeHTTP(rw, req)
 }
