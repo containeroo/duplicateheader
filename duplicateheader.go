@@ -53,14 +53,11 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 }
 
 func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	if req.Method == "OPTIONS" {
-		Logger.Println("Method is 'OPTIONS'. Skip setting headers")
-	} else {
-		if source := req.Header.Get(d.Source); source != "" {
-			for _, dest := range d.Destination {
-				Logger.Printf("Set Header: %v: %v", dest, source)
-				req.Header.Set(dest, source)
-			}
+	Logger.Printf("request method is: %v", req.Method)
+	if source := req.Header.Get(d.Source); source != "" {
+		for _, dest := range d.Destination {
+			Logger.Printf("Set Header: %v: %v", dest, source)
+			req.Header.Set(dest, source)
 		}
 	}
 	d.next.ServeHTTP(rw, req)
