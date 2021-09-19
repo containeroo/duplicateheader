@@ -27,6 +27,7 @@ middlewares:
   my-traefik-plugin-duplicateheader:
     plugin:
       duplicateheader:
+        debug: true
         source: Cf-Connecting-Ip
         destination:
           - X-Real-Ip
