@@ -3,13 +3,17 @@ package duplicateheader
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 )
 
 // Config the plugin configuration.
 type Config struct {
 	Source      string   `yaml:"source"`
 	Destination []string `yaml:"destination"`
+	Debug       bool     `yaml:"debug"`
 }
 
 // DuplicateHeader holds the necessary components of a Traefik plugin
@@ -19,6 +23,8 @@ type DuplicateHeader struct {
 	Source      string
 	Destination []string
 }
+
+var Logger = log.New(ioutil.Discard, "DEBUG: duplicateheader: ", log.Ldate|log.Ltime|log.Lshortfile)
 
 // CreateConfig creates and initializes the plugin configuration.
 func CreateConfig() *Config {
@@ -34,6 +40,10 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		return nil, fmt.Errorf("destination can't be empty")
 	}
 
+	if config.Debug {
+		Logger.SetOutput(os.Stdout)
+	}
+
 	return &DuplicateHeader{
 		next:        next,
 		name:        name,
@@ -43,10 +53,14 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 }
 
 func (d *DuplicateHeader) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	source := req.Header.Get(d.Source)
+	Logger.Printf("New request: %v", req)
+	Logger.Printf("Source Header: %v", d.Source)
+
+	source := rw.Header().Get(d.Source)
 	if len(source) != 0 {
 		for _, dest := range d.Destination {
-			req.Header.Set(dest, source)
+			Logger.Printf("Set Header: %v: %v", dest, source)
+			rw.Header().Set(dest, source)
 		}
 	}
 	d.next.ServeHTTP(rw, req)
